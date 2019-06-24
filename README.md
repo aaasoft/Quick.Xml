@@ -1,2 +1,2 @@
 # Quick.Xml
-Xml Serialerizer For .NET
+Xml Serializer For .NET.
