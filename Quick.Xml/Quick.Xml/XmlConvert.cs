@@ -249,6 +249,7 @@ namespace Quick.Xml
                 else
                     rootElement.Add(new XAttribute(XNamespace.Xmlns + shortName, ns));
             }
+            var encoding = new UTF8Encoding(false);
 
             //构建XML
             var document = new XDocument(
@@ -256,12 +257,13 @@ namespace Quick.Xml
                 rootElement
             );
             //输出XML
-            using (var writer = new StringWriter())
+            using (var stream = new MemoryStream())
+            using (var writer = new XmlTextWriter(stream, encoding))
             {
-                document.Save(writer, SaveOptions.None);
-                //document.Save()
+                writer.Formatting = System.Xml.Formatting.Indented;
+                document.Save(writer);
                 writer.Close();
-                return writer.ToString();
+                return encoding.GetString(stream.ToArray());
             }
         }
 

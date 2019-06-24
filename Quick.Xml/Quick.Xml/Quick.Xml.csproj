@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net35;net40;net45</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>aaaSoft</Authors>
+    <Description>Xml Serializer For .NET.</Description>
+    <PackageProjectUrl>https://github.com/aaasoft/Quick.Xml</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
