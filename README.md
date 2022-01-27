@@ -1,4 +1,6 @@
-# Quick.Xml
+# Quick.Xml 
+[![NuGet Version](http://img.shields.io/nuget/v/Quick.Xml.svg?style=flat)](https://www.nuget.org/packages/Quick.Xml/)
+
 Xml Serializer For .NET.
 
 Example:
