@@ -64,14 +64,23 @@ namespace Quick.Xml
                 sb.Replace(key, unescapeDict[key]);
             return sb.ToString();
         }
-
-        public static T Deserialize<T>(string xml, Action<string> logHandler = null)
-            where T : class
+        private static object CreateInstance(Type type, XmlConvertOptions options)
         {
-            return Deserialize(xml, logHandler) as T;
+            if (options?.InstanceFactory != null)
+            {
+                if (options.InstanceFactory.TryGetValue(type, out var factory))
+                    return factory.Invoke();
+            }
+            return Activator.CreateInstance(type);
         }
 
-        public static object Deserialize(string xml, Action<string> logHandler = null)
+        public static T Deserialize<T>(string xml, XmlConvertOptions options = null)
+            where T : class
+        {
+            return Deserialize(xml, options) as T;
+        }
+
+        public static object Deserialize(string xml,XmlConvertOptions options = null)
         {
             XDocument document = XDocument.Parse(xml);
             var rootElement = document.Root;
@@ -81,13 +90,13 @@ namespace Quick.Xml
             //准备字典
             Dictionary<PropertyInfo, JsonIgnoreAttribute> dictPropertyInfo_JsonIgnoreAttribute = new Dictionary<PropertyInfo, JsonIgnoreAttribute>();
 
-            var rootElementObj = Activator.CreateInstance(rootElementType);
+            var rootElementObj = CreateInstance(rootElementType, options);
             foreach (var pi in rootElementType.GetProperties())
-                ReadProperty(rootElementObj, pi, rootElement, dictPropertyInfo_JsonIgnoreAttribute, logHandler);
+                ReadProperty(rootElementObj, pi, rootElement, dictPropertyInfo_JsonIgnoreAttribute, options);
             return rootElementObj;
         }
 
-        public static void ReadProperty(object obj, PropertyInfo pi, XElement element, IDictionary<PropertyInfo, JsonIgnoreAttribute> dictPropertyInfo_JsonIgnoreAttribute, Action<string> logHandler)
+        public static void ReadProperty(object obj, PropertyInfo pi, XElement element, IDictionary<PropertyInfo, JsonIgnoreAttribute> dictPropertyInfo_JsonIgnoreAttribute, XmlConvertOptions options)
         {
             JsonIgnoreAttribute jsonIgnoreAttribute = null;
             if (!dictPropertyInfo_JsonIgnoreAttribute.ContainsKey(pi))
@@ -118,8 +127,8 @@ namespace Quick.Xml
                     || pi.PropertyType.IsArray)
                     list = new System.Collections.ArrayList();
                 else
-                    list = (System.Collections.IList)Activator.CreateInstance(pi.PropertyType);
-                
+                    list = (System.Collections.IList)CreateInstance(pi.PropertyType, options);
+
                 var piElement = element.Element(pi.Name);
                 if (piElement == null)
                     return;
@@ -128,12 +137,12 @@ namespace Quick.Xml
                     var itemType = getXmlNameType(itemElement.Name);
                     if (itemType == null)
                     {
-                        logHandler?.Invoke($"警告：类型[{itemElement.Name}]未找到。");
+                        options?.LogHandler?.Invoke($"警告：类型[{itemElement.Name}]未找到。");
                         continue;
                     }
-                    var itemObject = Activator.CreateInstance(itemType);
+                    var itemObject = CreateInstance(itemType, options);
                     foreach (var piItem in itemType.GetProperties())
-                        ReadProperty(itemObject, piItem, itemElement, dictPropertyInfo_JsonIgnoreAttribute, logHandler);
+                        ReadProperty(itemObject, piItem, itemElement, dictPropertyInfo_JsonIgnoreAttribute, options);
                     list.Add(itemObject);
                 }
                 if (pi.PropertyType.IsArray)
@@ -179,11 +188,11 @@ namespace Quick.Xml
             //如果是接口或者抽象类
             if (propertyValueType.IsInterface || propertyValueType.IsAbstract)
                 return;
-            var propertyValueObj = Activator.CreateInstance(propertyValueType);
+            var propertyValueObj = CreateInstance(propertyValueType, options);
             foreach (var piPropertyValue in propertyValueType.GetProperties())
             {
                 var piName = piPropertyValue.Name;
-                ReadProperty(propertyValueObj, piPropertyValue, tempElement, dictPropertyInfo_JsonIgnoreAttribute, logHandler);
+                ReadProperty(propertyValueObj, piPropertyValue, tempElement, dictPropertyInfo_JsonIgnoreAttribute, options);
             }
 #if NETSTANDARD2_0 || NET45
             pi.SetValue(obj, propertyValueObj);
