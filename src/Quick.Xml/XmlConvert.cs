@@ -101,11 +101,7 @@ namespace Quick.Xml
             JsonIgnoreAttribute jsonIgnoreAttribute = null;
             if (!dictPropertyInfo_JsonIgnoreAttribute.ContainsKey(pi))
             {
-#if NETSTANDARD2_0 || NET45
                 jsonIgnoreAttribute = pi.GetCustomAttribute<JsonIgnoreAttribute>();
-#else
-                jsonIgnoreAttribute = pi.GetCustomAttributes(typeof(JsonIgnoreAttribute), false).FirstOrDefault() as JsonIgnoreAttribute;
-#endif
                 dictPropertyInfo_JsonIgnoreAttribute[pi] = jsonIgnoreAttribute;
             }
             jsonIgnoreAttribute = dictPropertyInfo_JsonIgnoreAttribute[pi];
@@ -167,11 +163,7 @@ namespace Quick.Xml
                     try { valueObj = Enum.Parse(pi.PropertyType, value); } catch { }
                 else
                     valueObj = new JValue(value).ToObject(pi.PropertyType);
-#if NETSTANDARD2_0 || NET45
                 pi.SetValue(obj, valueObj);
-#else
-                pi.SetValue(obj, valueObj, null);
-#endif
                 return;
             }
             var propertyElement = element.Element(pi.Name);
@@ -194,11 +186,7 @@ namespace Quick.Xml
                 var piName = piPropertyValue.Name;
                 ReadProperty(propertyValueObj, piPropertyValue, tempElement, dictPropertyInfo_JsonIgnoreAttribute, options);
             }
-#if NETSTANDARD2_0 || NET45
             pi.SetValue(obj, propertyValueObj);
-#else
-            pi.SetValue(obj, propertyValueObj, null);
-#endif
         }
 
         private static Type getTypeFromClrNamespace(string clr_namespace, string typeName)
@@ -316,11 +304,7 @@ namespace Quick.Xml
             JsonIgnoreAttribute jsonIgnoreAttribute = null;
             if (!dictPropertyInfo_JsonIgnoreAttribute.ContainsKey(pi))
             {
-#if NETSTANDARD2_0 || NET45
                 jsonIgnoreAttribute = pi.GetCustomAttribute<JsonIgnoreAttribute>();
-#else
-                jsonIgnoreAttribute = pi.GetCustomAttributes(typeof(JsonIgnoreAttribute), false).FirstOrDefault() as JsonIgnoreAttribute;
-#endif
                 dictPropertyInfo_JsonIgnoreAttribute[pi] = jsonIgnoreAttribute;
             }
             jsonIgnoreAttribute = dictPropertyInfo_JsonIgnoreAttribute[pi];
@@ -333,11 +317,7 @@ namespace Quick.Xml
                 || pi.GetGetMethod().IsStatic
                 || pi.GetSetMethod().IsStatic)
                 return;
-#if NETSTANDARD2_0 || NET45
             var value = pi.GetValue(obj);
-#else
-            var value = pi.GetValue(obj, null);
-#endif
             if (value == null)
                 return;
             var valueType = value.GetType();
