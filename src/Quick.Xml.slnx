@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Quick.Xml.Test/Quick.Xml.Test.csproj" />
+  <Project Path="Quick.Xml/Quick.Xml.csproj" />
+</Solution>
